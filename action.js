@@ -5,12 +5,17 @@ async function handleGit(moduleName) {
   try {
     const REPO_URL = `https://${process.env.GIT_USER}:${process.env.GIT_PASSWORD}@github.com/${process.env.GIT_USER}/${process.env.GIT_REPOSITORY}`;
     const git = simpleGit();
+
+    // 1. clone the repo & 2. copy module from repo & 3. delete repo
     await git.clone(REPO_URL, `./temp-repo`);
     await fs.copy(`./temp-repo/src/${moduleName}`, `./src/${moduleName}`);
     await fs.remove("./temp-repo");
 
+    //* file permission
     const files = await fs.readdir(`./src/${moduleName}`);
-    console.log(files);
+    for (let i = 0; i < files.length; i++) {
+      handleFilesPermission(files[i], moduleName);
+    }
 
     console.log(`${moduleName} module moved into src folder`);
   } catch (error) {
@@ -19,7 +24,36 @@ async function handleGit(moduleName) {
   }
 }
 
-// async function handleFilePermission(path) {}
+async function handleFilesPermission(name, module) {
+  try {
+    if (!name.endsWith(".ts")) {
+      handleFolderPermission(name, module);
+    } else {
+      await fs.chmod(`./src/${module}/${name}`, 0o755);
+    }
+    return;
+  } catch (error) {
+    console.log("error in handleFilePermission method");
+    console.log(error);
+    return error;
+  }
+}
+
+async function handleFolderPermission(folderName, module) {
+  try {
+    const files = await fs.readdir(`./src/${module}/${folderName}`);
+    if (files.length > 0) {
+      for (let i = 0; i < array.length; i++) {
+        await fs.chmod(`./src/${module}/${folderName}/${files[i]}`, 0o755);
+      }
+    }
+    return;
+  } catch (error) {
+    console.log("error in handleFolderPermission method");
+    console.log(error);
+    return error;
+  }
+}
 
 module.exports.handleDatabase = () => {
   console.log("adding database module");
