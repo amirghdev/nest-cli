@@ -3,7 +3,7 @@ const fs = require("fs-extra");
 
 async function handleGit(moduleName) {
   try {
-    const REPO_URL = `https://${process.env.GIT_USER}:${process.env.GIT_PASSWORD}@github.com/amirghdev/${process.env.GIT_REPOSITORY}`;
+    const REPO_URL = `https://${process.env.GIT_USER}:${process.env.GIT_PASSWORD}@github.com/${process.env.GIT_USER}/${process.env.GIT_REPOSITORY}`;
     const git = simpleGit();
     await git.clone(REPO_URL, `./temp-repo`);
     await fs.copy(`./temp-repo/src/${moduleName}`, `./src/${moduleName}`);
