@@ -4,7 +4,7 @@ const { program } = require("commander");
 
 const inquirer = require("inquirer");
 
-const { handleDatabase, handleEmail, handleHelper, handleUpload, handleEnv } = require("./action");
+const { handleDatabase, handleEmail, handleHelper, handleUpload, handleEnv, handleGit } = require("./action");
 const ui = new inquirer.ui.BottomBar();
 
 try {
@@ -41,6 +41,19 @@ try {
       ]);
       handleEnv("GIT_REPOSITORY", data.repository);
     }
+    let folders = "";
+    if (!process.env.GIT_FOLDERS) {
+      console.log("there is no GIT_FOLDERS file");
+      const data = await inquirer.prompt([
+        {
+          type: "question",
+          name: "folders",
+          message: "enter your git modules like this (test,test1,test2,test3)",
+        },
+      ]);
+      folders = data.folders;
+      handleEnv("GIT_FOLDERS", data.folders);
+    }
     addCommand();
   });
   program.command("help").action(async () => {
@@ -49,31 +62,25 @@ try {
   });
   program.parse();
 } catch (error) {
+  console.log("error");
   console.log(error);
   return error;
 }
 
 async function addCommand() {
-  const action = await inquirer.prompt([
-    {
-      type: "list",
-      name: "module",
-      message: "Enter the module name you want to clone:",
-      choices: ["database", "upload", "email", "helper"],
-    },
-  ]);
-  switch (action.module) {
-    case "database":
-      handleDatabase();
-      break;
-    case "upload":
-      handleUpload();
-      break;
-    case "email":
-      handleEmail();
-      break;
-    case "helper":
-      handleHelper();
-      break;
+  try {
+    const choices = process.env.GIT_FOLDERS;
+    const list = choices.split(",");
+    const action = await inquirer.prompt([
+      {
+        type: "list",
+        name: "module",
+        message: "select the module name you want to clone:",
+        choices: list,
+      },
+    ]);
+    await handleGit(action.module);
+  } catch (error) {
+    console.log(error);
   }
 }

@@ -1,7 +1,7 @@
 const simpleGit = require("simple-git");
 const fs = require("fs-extra");
 
-async function handleGit(moduleName) {
+module.exports.handleGit = async (moduleName) => {
   try {
     const REPO_URL = `https://${process.env.GIT_USER}:${process.env.GIT_PASSWORD}@github.com/${process.env.GIT_USER}/${process.env.GIT_REPOSITORY}`;
     const git = simpleGit();
@@ -12,17 +12,17 @@ async function handleGit(moduleName) {
     await fs.remove("./temp-repo");
 
     //* file permission
-    const files = await fs.readdir(`./src/${moduleName}`);
-    for (let i = 0; i < files.length; i++) {
-      handleFilesPermission(files[i], moduleName);
-    }
+    // const files = await fs.readdir(`./src/${moduleName}`);
+    // for (let i = 0; i < files.length; i++) {
+    //   handleFilesPermission(files[i], moduleName);
+    // }
 
     console.log(`${moduleName} module moved into src folder`);
   } catch (error) {
     console.log(error);
     return error;
   }
-}
+};
 
 async function handleFilesPermission(name, module) {
   try {
@@ -55,31 +55,10 @@ async function handleFolderPermission(folderName, module) {
   }
 }
 
-module.exports.handleDatabase = () => {
-  console.log("adding database module");
-  handleGit("database");
-};
-
-module.exports.handleUpload = () => {
-  console.log("adding upload module");
-  handleGit("upload");
-};
-
-module.exports.handleHelper = () => {
-  console.log("adding helper module");
-  handleGit("helper");
-};
-
-module.exports.handleEmail = () => {
-  console.log("adding email module");
-  handleGit("email");
-};
-
 module.exports.handleEnv = async (name, value) => {
   try {
-    const exits = await fs.pathExists(".env");
-
-    if (exits) {
+    const exists = await fs.pathExists(".env");
+    if (exists) {
       const content = await fs.readFile(".env", "utf8");
       const arr = content.split("\n");
       arr.push(`${name} = ${value}`);
@@ -95,7 +74,8 @@ module.exports.handleEnv = async (name, value) => {
       return;
     }
   } catch (error) {
+    console.log("error in handleEnv");
     console.log(error);
-    throw error;
+    return error;
   }
 };
