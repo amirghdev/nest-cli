@@ -11,6 +11,7 @@ module.exports.handleGit = async (moduleNames) => {
     await git.clone(REPO_URL, `./temp-repo`);
 
     for (let i = 0; i < moduleNames.length; i++) {
+      await fs.ensureDir(`./temp-repo/src/${moduleNames[i]}`);
       await fs.copy(`./temp-repo/src/${moduleNames[i]}`, `./src/${moduleNames[i]}`);
       console.log(`${moduleNames[i]} module moved into src folder`);
     }
@@ -86,6 +87,7 @@ module.exports.handleEnv = async (name, value) => {
 
 module.exports.updateEnvs = async (names) => {
   try {
+    await fs.ensureFile(".env");
     const file = await fs.readFile(".env", { encoding: "utf-8" });
     const lines = file.split("\n");
     for (let i = 0; i < names.length; i++) {
