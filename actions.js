@@ -1,9 +1,10 @@
 const simpleGit = require("simple-git");
 const fs = require("fs-extra");
+const inquirer = require("inquirer");
 
 module.exports.handleGit = async (moduleNames) => {
   try {
-    const REPO_URL = `https://${process.env.GIT_USER}:${process.env.GIT_PASSWORD}@github.com/${process.env.GIT_USER}/${process.env.GIT_REPOSITORY}`;
+    const REPO_URL = `https://${process.env.GIT_USERNAME}:${process.env.GIT_PASSWORD}@github.com/${process.env.GIT_USERNAME}/${process.env.GIT_REPOSITORY}`;
     const git = simpleGit();
 
     // 1. clone the repo & 2. copy module from repo & 3. delete repo
@@ -83,4 +84,37 @@ module.exports.handleEnv = async (name, value) => {
   }
 };
 
-module.exports.updateEnvs = async (name) => {};
+module.exports.updateEnvs = async (names) => {
+  try {
+    const file = await fs.readFile(".env", { encoding: "utf-8" });
+    const lines = file.split("\n");
+    for (let i = 0; i < names.length; i++) {
+      for (let j = 0; j < lines.length; j++) {
+        if (lines[j].startsWith(`GIT_${names[i]}`)) {
+          await updateEnv(`GIT_${names[i]}`, lines, j, lines[j]);
+        }
+      }
+    }
+    return;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+async function updateEnv(name, file, index, currentValue) {
+  try {
+    currentValue = currentValue.split("=");
+    const newValue = await inquirer.prompt({
+      type: "question",
+      name,
+      message: `enter new value for ${name} current value : ${currentValue[1].trim()}`,
+    });
+    file[index] = `${name} = ${newValue[name]}`;
+    await fs.writeFile(".env", file.join("\n"));
+    console.log(`${name} updated !`);
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+}

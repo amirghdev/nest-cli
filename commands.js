@@ -1,13 +1,13 @@
 require("dotenv").config();
 //* imports
-const { handleGit, handleEnv } = require("./actions");
+const { handleGit, handleEnv, updateEnvs } = require("./actions");
 
 //* modules
 const inquirer = require("inquirer");
 const ui = new inquirer.ui.BottomBar();
 
 module.exports.addCommand = async () => {
-  if (!process.env.GIT_USER) {
+  if (!process.env.GIT_USERNAME) {
     const data = await inquirer.prompt([
       {
         type: "question",
@@ -15,7 +15,7 @@ module.exports.addCommand = async () => {
         message: "enter your git username",
       },
     ]);
-    await handleEnv("GIT_USER", data.username);
+    await handleEnv("GIT_USERNAME", data.username);
   }
   if (!process.env.GIT_PASSWORD) {
     const data = await inquirer.prompt([
@@ -75,9 +75,8 @@ module.exports.updateCommand = async () => {
       type: "checkbox",
       name: "envNames",
       message: "select which env you want to update",
-      choices: ["username", "password", "repository", "folders"],
+      choices: ["USERNAME", "PASSWORD", "REPOSITORY", "FOLDERS"],
     },
   ]);
-  console.log(envForUpdate.envNames);
-  return;
+  await updateEnvs(envForUpdate.envNames);
 };
