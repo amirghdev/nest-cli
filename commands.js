@@ -53,18 +53,31 @@ module.exports.addCommand = async () => {
 
   const choices = process.env.GIT_FOLDERS;
   const list = choices.split(",");
-  const action = await inquirer.prompt([
+  const actions = await inquirer.prompt([
     {
-      type: "list",
-      name: "module",
-      message: "select the module name you want to clone:",
+      type: "checkbox",
+      name: "modules",
+      message: "select the modules name you want to clone",
       choices: list,
     },
   ]);
-  await handleGit(action.module);
+  await handleGit(actions.modules);
 };
 
 module.exports.helpCommand = async () => {
   ui.log.write("hi welcome to my nestjs basic cli use add command");
   process.exit(0);
+};
+
+module.exports.updateCommand = async () => {
+  const envForUpdate = await inquirer.prompt([
+    {
+      type: "checkbox",
+      name: "envNames",
+      message: "select which env you want to update",
+      choices: ["username", "password", "repository", "folders"],
+    },
+  ]);
+  console.log(envForUpdate.envNames);
+  return;
 };

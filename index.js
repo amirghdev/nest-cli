@@ -3,7 +3,7 @@ require("dotenv").config();
 const { program } = require("commander");
 
 //* commands
-const { addCommand, helpCommand } = require("./commands");
+const { addCommand, helpCommand, updateCommand } = require("./commands");
 
 try {
   program.version("1.0.0").description("Custom CLI for managing NestJS project");
@@ -11,6 +11,7 @@ try {
   //? command lists
   program.command("add").action(addCommand);
   program.command("help").action(helpCommand);
+  program.command("update").action(updateCommand);
 
   program.parse();
 } catch (error) {
