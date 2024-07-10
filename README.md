@@ -5,15 +5,15 @@ With this basic cli, you can import all the modules you need from any of your Gi
 ## Install
 Clone the project. 
 
-- 1. clone the project
+- clone the project
 
-- 2. npm install
+- npm install
 
-- 3. in package.json, edit the bin property to what name you want for your cli. 
+- in package.json, edit the bin property to what name you want for your cli. 
 
-- 4. chmod +x index.js Use this command to make your application executable. (linux only)
+- chmod +x index.js Use this command to make your application executable. (linux only)
 
-- 5. npm link for using this cli localy
+- npm link for using this cli localy
 
 - enjoy using it 😄
 
