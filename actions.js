@@ -2,33 +2,6 @@ const simpleGit = require("simple-git");
 const fs = require("fs-extra");
 const inquirer = require("inquirer");
 
-module.exports.handleGit = async (moduleNames) => {
-  try {
-    const REPO_URL = `https://${process.env.GIT_USERNAME}:${process.env.GIT_PASSWORD}@github.com/${process.env.GIT_USERNAME}/${process.env.GIT_REPOSITORY}`;
-    const git = simpleGit();
-
-    // 1. clone the repo & 2. copy module from repo & 3. delete repo
-    await git.clone(REPO_URL, `./temp-repo`);
-
-    for (let i = 0; i < moduleNames.length; i++) {
-      await fs.ensureDir(`./temp-repo/src/${moduleNames[i]}`);
-      await fs.copy(`./temp-repo/src/${moduleNames[i]}`, `./src/${moduleNames[i]}`);
-      console.log(`${moduleNames[i]} module moved into src folder`);
-    }
-    await fs.remove("./temp-repo");
-    return;
-
-    //* file permission
-    // const files = await fs.readdir(`./src/${moduleName}`);
-    // for (let i = 0; i < files.length; i++) {
-    //   handleFilesPermission(files[i], moduleName);
-    // }
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
-};
-
 async function handleFilesPermission(name, module) {
   try {
     if (!name.endsWith(".ts")) {
@@ -55,6 +28,45 @@ async function handleFolderPermission(folderName, module) {
     return;
   } catch (error) {
     console.log("error in handleFolderPermission method");
+    console.log(error);
+    return error;
+  }
+}
+
+async function updateEnv(name, file, index, currentValue) {
+  try {
+    currentValue = currentValue.split("=");
+    const newValue = await inquirer.prompt({
+      type: "question",
+      name,
+      message: `enter new value for ${name} current value : ${currentValue[1].trim()}`,
+    });
+    file[index] = `${name} = ${newValue[name]}`;
+    await fs.writeFile(".env", file.join("\n"));
+    console.log(`${name} updated !`);
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+}
+
+async function addTopImport(moduleNames) {
+  try {
+    const file = await fs.readFile("./src/app.module.ts", { encoding: "utf-8" });
+    const fileArray = file.split("\n");
+    for (let i = 0; i < moduleNames.length; i++) {
+      const firstLetter = moduleNames[i].charAt(0).toUpperCase();
+      const moduleName = `${firstLetter}${moduleNames[i].slice(1)}Module`;
+      const importPath = `import { ${moduleName} } from './src/${moduleNames[i]}/${moduleNames[i]}.module'`;
+      for (let j = 0; j < fileArray.length; j++) {
+        if (fileArray[j].startsWith("@Module")) {
+          fileArray.splice(j, 0, importPath);
+          break;
+        }
+      }
+      console.log(fileArray);
+    }
+  } catch (error) {
     console.log(error);
     return error;
   }
@@ -104,19 +116,40 @@ module.exports.updateEnvs = async (names) => {
   }
 };
 
-async function updateEnv(name, file, index, currentValue) {
+module.exports.handleGit = async (moduleNames) => {
   try {
-    currentValue = currentValue.split("=");
-    const newValue = await inquirer.prompt({
-      type: "question",
-      name,
-      message: `enter new value for ${name} current value : ${currentValue[1].trim()}`,
+    const REPO_URL = `https://${process.env.GIT_USERNAME}:${process.env.GIT_PASSWORD}@github.com/${process.env.GIT_USERNAME}/${process.env.GIT_REPOSITORY}`;
+    const git = simpleGit();
+
+    // 1. clone the repo & 2. copy module from repo & 3. delete repo
+    await git.clone(REPO_URL, `./temp-repo`);
+
+    for (let i = 0; i < moduleNames.length; i++) {
+      await fs.ensureDir(`./temp-repo/src/${moduleNames[i]}`);
+      await fs.copy(`./temp-repo/src/${moduleNames[i]}`, `./src/${moduleNames[i]}`);
+      console.log(`${moduleNames[i]} module moved into src folder`);
+    }
+    await fs.remove("./temp-repo");
+
+    const updateImport = await inquirer.prompt({
+      type: "confirm",
+      name: "update",
+      message: "update imports ?",
     });
-    file[index] = `${name} = ${newValue[name]}`;
-    await fs.writeFile(".env", file.join("\n"));
-    console.log(`${name} updated !`);
+
+    if (updateImport.update) {
+      await addTopImport(moduleNames);
+    }
+
+    return;
+
+    //* file permission
+    // const files = await fs.readdir(`./src/${moduleName}`);
+    // for (let i = 0; i < files.length; i++) {
+    //   handleFilesPermission(files[i], moduleName);
+    // }
   } catch (error) {
     console.log(error);
     return error;
   }
-}
+};
