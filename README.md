@@ -3,7 +3,6 @@ I already created a private basic NestJS application with some functions for mys
 With this basic cli, you can import all the modules you need from any of your GitHub repositories. 
 
 ## Install
-Clone the project. 
 
 - clone the project
 
