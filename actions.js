@@ -57,20 +57,52 @@ async function addTopImport(moduleNames) {
     for (let i = 0; i < moduleNames.length; i++) {
       const firstLetter = moduleNames[i].charAt(0).toUpperCase();
       const moduleName = `${firstLetter}${moduleNames[i].slice(1)}Module`;
-      const importPath = `import { ${moduleName} } from './src/${moduleNames[i]}/${moduleNames[i]}.module'`;
+      const importPath = `import { ${moduleName} } from './${moduleNames[i]}/${moduleNames[i]}.module';`;
       for (let j = 0; j < fileArray.length; j++) {
         if (fileArray[j].startsWith("@Module")) {
           fileArray.splice(j, 0, importPath);
+          handleImportsArray(moduleName, fileArray);
+          await fs.writeFile("./src/app.module.ts", fileArray.join("\n"));
+          console.log(`${moduleNames[i]} module import updated!`);
           break;
         }
       }
-      console.log(fileArray);
     }
   } catch (error) {
     console.log(error);
     return error;
   }
 }
+
+async function handleImportsArray(moduleName, fileArray) {
+  try {
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+}
+
+// @Module({
+//   controllers: [AppController],
+//   providers: [AppService],
+// })
+
+// @Module({
+//   imports: [testModule,testModule2,testModule3,testModule4]
+//   controllers: [AppController],
+//   providers: [AppService],
+// })
+
+// @Module({
+//   imports: [
+//    testModule,
+//    testModule2,
+//    testModule3,
+//    testModule4
+//   ],
+//   controllers: [AppController],
+//   providers: [AppService],
+// })
 
 module.exports.handleEnv = async (name, value) => {
   try {
