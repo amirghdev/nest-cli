@@ -76,6 +76,16 @@ async function addTopImport(moduleNames) {
 
 async function handleImportsArray(moduleName, fileArray) {
   try {
+    for (let i = 0; i < fileArray.length; i++) {
+      if (fileArray[i].startsWith("@Module")) {
+        const nextIndex = fileArray[i + 1];
+        //* there is no imports
+        if (nextIndex.trim().startsWith("controllers")) {
+          fileArray.splice(i + 1, 0, `  imports: [${moduleName}]`);
+          await fs.writeFile("./src/app.module.ts", fileArray.join("\n"));
+        }
+      }
+    }
   } catch (error) {
     console.log(error);
     return error;
@@ -157,7 +167,13 @@ module.exports.handleGit = async (moduleNames) => {
     await git.clone(REPO_URL, `./temp-repo`);
 
     for (let i = 0; i < moduleNames.length; i++) {
-      await fs.ensureDir(`./temp-repo/src/${moduleNames[i]}`);
+      const exists = await fs.exists(`./src/${moduleNames[i]}`);
+      if (exists) {
+        await fs.remove("./temp-repo");
+        throw `${moduleNames[i]} module already exists in src folder`;
+      } else {
+        await fs.ensureDir(`./temp-repo/src/${moduleNames[i]}`);
+      }
       await fs.copy(`./temp-repo/src/${moduleNames[i]}`, `./src/${moduleNames[i]}`);
       console.log(`${moduleNames[i]} module moved into src folder`);
     }
