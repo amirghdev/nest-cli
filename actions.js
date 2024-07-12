@@ -78,11 +78,30 @@ async function handleImportsArray(moduleName, fileArray) {
   try {
     for (let i = 0; i < fileArray.length; i++) {
       if (fileArray[i].startsWith("@Module")) {
-        const nextIndex = fileArray[i + 1];
+        let nextIndex = fileArray[i + 1].trim();
         //* there is no imports
-        if (nextIndex.trim().startsWith("controllers")) {
-          fileArray.splice(i + 1, 0, `  imports: [${moduleName}]`);
+        if (nextIndex.startsWith("controllers")) {
+          fileArray.splice(i + 1, 0, `  imports: [${moduleName}],`);
           await fs.writeFile("./src/app.module.ts", fileArray.join("\n"));
+          //* one line import like this imports: [test,test1,test2,test3]
+        } else if (nextIndex.startsWith("imports") && nextIndex.endsWith(",")) {
+          const arrayOfChar = nextIndex.split("");
+          const charIndex = arrayOfChar.indexOf("]");
+          if (nextIndex == "imports: []," || nextIndex == "imports: []") {
+            arrayOfChar.splice(charIndex, 0, `${moduleName}`);
+          } else {
+            arrayOfChar.splice(charIndex, 0, `, ${moduleName}`);
+          }
+          nextIndex = `  ${arrayOfChar.join("")}`;
+          fileArray[i + 1] = nextIndex;
+          await fs.writeFile("./src/app.module.ts", fileArray.join("\n"));
+          //* multiply line of imports
+        } else if (nextIndex.startsWith("imports") && nextIndex.endsWith("[")) {
+          const index = fileArray.indexOf("  ],");
+          fileArray.splice(index, 0, `    ${moduleName},`);
+          await fs.writeFile("./src/app.module.ts", fileArray.join("\n"));
+        } else {
+          throw "something went wrong!";
         }
       }
     }
