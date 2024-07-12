@@ -111,28 +111,6 @@ async function handleImportsArray(moduleName, fileArray) {
   }
 }
 
-// @Module({
-//   controllers: [AppController],
-//   providers: [AppService],
-// })
-
-// @Module({
-//   imports: [testModule,testModule2,testModule3,testModule4]
-//   controllers: [AppController],
-//   providers: [AppService],
-// })
-
-// @Module({
-//   imports: [
-//    testModule,
-//    testModule2,
-//    testModule3,
-//    testModule4
-//   ],
-//   controllers: [AppController],
-//   providers: [AppService],
-// })
-
 module.exports.handleEnv = async (name, value) => {
   try {
     const exists = await fs.pathExists(".env");

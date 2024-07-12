@@ -80,3 +80,8 @@ module.exports.updateCommand = async () => {
   ]);
   await updateEnvs(envForUpdate.envNames);
 };
+
+module.exports.aboutCommand = async () => {
+  ui.log.write("Hi, my name is Amir Mohammed Gharibi, a simple developer who loves to create programs that save other people time.  \nI hope this program helps you.\nmy github: amirghdev");
+  process.exit(0);
+};
